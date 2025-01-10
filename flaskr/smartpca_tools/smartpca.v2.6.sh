@@ -5,12 +5,22 @@
 # @File : smartpca.2.5.sh
 # @Author : zky
 
-geno_dir=/root/data-upload/smartpca
+# 接收工作目录作为参数
+workdir=$1
+if [ -z "$workdir" ]; then
+    echo "Error: Work directory not provided"
+    exit 1
+fi
+
+# 设置文件路径
+geno_dir=${workdir}
 geno_file=example  # prefix
-workdir=/root/data-upload/smartpca
-poplist=/root/data-upload/smartpca/pop-list.txt
-pcaRploter=/root/my-project/web-database-backend/backend/flaskr/smartpca_tools/pcaRploter.v4.4.py
-bc=/root/my-project/web-database-backend/backend/flaskr/smartpca_tools/bc.py
+poplist=${workdir}/pop-list.txt
+
+# 设置脚本路径（使用绝对路径）
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+pcaRploter=${SCRIPT_DIR}/pcaRploter.v4.4.py
+bc=${SCRIPT_DIR}/bc.py
 
 # alias rmsp='sed "s/^\s*//g" | sed "s/[[:blank:]]\+/\t/g"'
 rmsp() {
@@ -19,7 +29,15 @@ rmsp() {
 
 cd ${workdir}
 
-if [ ! -f ${geno_dir}/${geno_file}.geno ] || [ ! -f ${pcaRploter} ] || [ ! -f ${poplist} ];then echo "!!! Missing files !!! " ; exit ; fi
+# 验证必需文件
+if [ ! -f ${geno_dir}/${geno_file}.geno ] || [ ! -f ${pcaRploter} ] || [ ! -f ${poplist} ]; then
+    echo "Error: Missing required files"
+    echo "Checking files:"
+    echo "Geno file: ${geno_dir}/${geno_file}.geno"
+    echo "PCA plotter: ${pcaRploter}"
+    echo "Population list: ${poplist}"
+    exit 1
+fi
 
 # check extract.poplist
 echo -e "=== checking popluations ! ==="

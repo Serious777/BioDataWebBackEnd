@@ -31,7 +31,7 @@ def init_app(app):
     app.config.from_mapping(
         MYSQL_HOST='127.0.0.1',  # 你的 MySQL 服务器地址
         MYSQL_USER='root',  # 你的 MySQL 用户名
-        MYSQL_PASSWORD='123456',  # 你的 MySQL 密码
+        MYSQL_PASSWORD='142536',  # 你的 MySQL 密码
         MYSQL_DB='biodatabase'  # 你的数据库名称
     )
     # 注册关闭数据库连接的函数
