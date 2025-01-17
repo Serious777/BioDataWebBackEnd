@@ -1,5 +1,5 @@
 from flask import Flask, request, send_file, jsonify, url_for
-from .tasks import process_pca, process_admixture
+from .tasks import process_pca, process_admixture, process_f3, process_f4
 from .celery_config import celery
 import os
 import uuid
@@ -10,15 +10,35 @@ from .upload_manager import UploadManager
 
 logger = logging.getLogger('flaskr.tools')
 bp = Blueprint('tools', __name__, url_prefix='/tools')
-PCA_SCRIPT_PATH = "/root/my-project/web-database-backend/backend/flaskr/smartpca_tools/smartpca.v2.6.sh"
+
+# 设置脚本和工作目录路径
+PCA_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                              "smartpca_tools", "smartpca.v2.6.sh")
 PCA_WORK_DIR = "/root/data-upload/smartpca/"
+
 TEMP_WORK_DIR = "/root/data-upload/temp/"
-os.makedirs(TEMP_WORK_DIR, exist_ok=True)
-os.makedirs(PCA_WORK_DIR, exist_ok=True)
+
 ADMIXTURE_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                     "admixture_v2.6", "admixture.v2.6.sh")
+ADMIXTURE_SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                     "admixture_v2.6")
 ADMIXTURE_WORK_DIR = "/root/data-upload/admixture/"
+
+F3_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                             "f3_tools_v1.0", "f3_v1.0.sh")
+F3_WORK_DIR = "/root/data-upload/f3/"
+
+# 添加F4相关路径配置
+F4_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                             "f4_tools_v1.4", "f4_v1.4.sh")
+F4_WORK_DIR = "/root/data-upload/f4/"
+
+# 创建必要的目录
+os.makedirs(TEMP_WORK_DIR, exist_ok=True)
+os.makedirs(PCA_WORK_DIR, exist_ok=True)
 os.makedirs(ADMIXTURE_WORK_DIR, exist_ok=True)
+os.makedirs(F3_WORK_DIR, exist_ok=True)
+os.makedirs(F4_WORK_DIR, exist_ok=True)
 
 # 初始化上传管理器
 upload_manager = UploadManager()
@@ -137,17 +157,23 @@ def download_result(task_id):
     try:
         logger.info(f"开始处理下载请求: task_id={task_id}")
         
-        # 检查两个可能的工作目录
+        # 检查所有可能的工作目录
         pca_work_dir = os.path.join(PCA_WORK_DIR, task_id)
         admixture_work_dir = os.path.join(ADMIXTURE_WORK_DIR, task_id)
+        f3_work_dir = os.path.join(F3_WORK_DIR, task_id)
+        f4_work_dir = os.path.join(F4_WORK_DIR, task_id)
         
         # 检查对应的结果文件
         pca_result = os.path.join(pca_work_dir, "smartpca.zip")
         admixture_result = os.path.join(admixture_work_dir, "admixture.zip")
+        f3_result = os.path.join(f3_work_dir, "f3.zip")
+        f4_result = os.path.join(f4_work_dir, "f4.zip")
         
         # 获取任务状态
         task_pca = process_pca.AsyncResult(task_id)
         task_admixture = process_admixture.AsyncResult(task_id)
+        task_f3 = process_f3.AsyncResult(task_id)
+        task_f4 = process_f4.AsyncResult(task_id)
         
         # 根据任务状态和结果文件确定任务类型
         if task_pca.state == 'SUCCESS' and os.path.exists(pca_result):
@@ -158,10 +184,17 @@ def download_result(task_id):
             zip_file_path = admixture_result
             result_prefix = "admixture"
             logger.info(f"Found successful admixture task, checking file: {zip_file_path}")
+        elif task_f3.state == 'SUCCESS' and os.path.exists(f3_result):
+            zip_file_path = f3_result
+            result_prefix = "f3"
+            logger.info(f"Found successful F3 task, checking file: {zip_file_path}")
+        elif task_f4.state == 'SUCCESS' and os.path.exists(f4_result):
+            zip_file_path = f4_result
+            result_prefix = "f4"
+            logger.info(f"Found successful F4 task, checking file: {zip_file_path}")
         else:
             logger.warning(f"任务 {task_id} 未完成或不存在")
             return jsonify({"error": "任务尚未完成或不存在"}), 404
-
             
         # 检查文件大小
         file_size = os.path.getsize(zip_file_path)
@@ -210,7 +243,7 @@ def admixtureAnalysis():
         # 创建工作目录并复制文件
         os.makedirs(work_dir)
         
-        # 复制并重命名文件
+        # 复制并重命名文件，同时设置正确的权限
         for file_name in os.listdir(temp_dir):
             src_path = os.path.join(temp_dir, file_name)
             if file_name.endswith('.txt'):
@@ -219,6 +252,26 @@ def admixtureAnalysis():
                 dst_name = 'example' + os.path.splitext(file_name)[1]
             dst_path = os.path.join(work_dir, dst_name)
             shutil.copy2(src_path, dst_path)
+            # 添加执行权限
+            os.chmod(dst_path, 0o755)  # rwxr-xr-x
+        
+        # 复制必需的R脚本并设置权限
+        script_dir = os.path.dirname(ADMIXTURE_SCRIPT_PATH)
+        r_scripts = ['fancyADMIXTURE.r', 'makePalette.r', 'averagePopsUnsorted.r', 'averagePops.r', 'remove_excess.py']
+        for script in r_scripts:
+            src = os.path.join(script_dir, script)
+            dst = os.path.join(work_dir, script)
+            shutil.copy2(src, dst)
+            # 添加执行权限
+            os.chmod(dst, 0o755)  # rwxr-xr-x
+
+            # 如果是R脚本，确保它有正确的文件头
+            if script.endswith('.r'):
+                with open(dst, 'r') as f:
+                    content = f.read()
+                if not content.startswith('#!/usr/bin/env Rscript'):
+                    with open(dst, 'w') as f:
+                        f.write('#!/usr/bin/env Rscript\n\n' + content)
         
         # 清理临时目录
         shutil.rmtree(temp_dir)
@@ -238,6 +291,7 @@ def admixtureAnalysis():
     except Exception as e:
         logger.error(f"Error in admixtureAnalysis: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
 
 @bp.route("/upload/chunk", methods=['POST'])
 def upload_chunk():
@@ -321,19 +375,205 @@ def cancel_upload():
         total_chunks = data.get('totalChunks')
         task_id = data.get('taskId')
         
+        if not file_id or not total_chunks:
+            return jsonify({"error": "Missing required parameters"}), 400
+            
         # 清理分片文件
-        upload_manager.cancel_upload(file_id, total_chunks)
-        
+        chunk_dir = os.path.join(TEMP_WORK_DIR, file_id)
+        if os.path.exists(chunk_dir):
+            shutil.rmtree(chunk_dir)
+          
         # 如果有 task_id，清理整个工作目录
         if task_id:
-            work_dir = os.path.join(ADMIXTURE_WORK_DIR, task_id)
-            if os.path.exists(work_dir):
-                shutil.rmtree(work_dir)
+            # 检查并清理所有可能的工作目录
+            # PCA工作目录
+            pca_dir = os.path.join(PCA_WORK_DIR, task_id)
+            if os.path.exists(pca_dir):
+                shutil.rmtree(pca_dir)
                 
+            # ADMIXTURE工作目录
+            admixture_dir = os.path.join(ADMIXTURE_WORK_DIR, task_id)
+            if os.path.exists(admixture_dir):
+                shutil.rmtree(admixture_dir)
+                
+            # F3工作目录
+            f3_dir = os.path.join(F3_WORK_DIR, task_id)
+            if os.path.exists(f3_dir):
+                shutil.rmtree(f3_dir)
+                
+            # 检查并清理 F4 工作目录
+            f4_dir = os.path.join(F4_WORK_DIR, task_id)
+            if os.path.exists(f4_dir):
+                shutil.rmtree(f4_dir)
+                  
+        logger.info(f"Successfully canceled upload for file_id={file_id}, task_id={task_id}")
         return jsonify({"success": True})
         
     except Exception as e:
         logger.error(f"Error canceling upload: {str(e)}")
+        # 返回详细的错误信息
+        return jsonify({
+            "error": str(e),
+            "details": {
+                "file_id": file_id,
+                "task_id": task_id,
+                "total_chunks": total_chunks,
+                "temp_dir": TEMP_WORK_DIR,
+                "work_dirs": {
+                    "pca": PCA_WORK_DIR,
+                    "admixture": ADMIXTURE_WORK_DIR,
+                    "f3": F3_WORK_DIR,
+                    "f4": F4_WORK_DIR
+                }
+            }
+        }), 500
+
+@bp.route("/f3", methods=['POST'])
+def f3Analysis():
+    try:
+        data = request.get_json()
+        upload_id = data.get('uploadId')
+        
+        # 生成新的task_id
+        task_id = str(uuid.uuid4())
+        
+        # 源目录和目标目录
+        temp_dir = os.path.join(TEMP_WORK_DIR, upload_id)
+        work_dir = os.path.join(F3_WORK_DIR, task_id)
+        
+        # 创建工作目录并复制文件
+        os.makedirs(work_dir)
+        
+        # 检查必需的txt文件是否存在
+        required_txt_files = {'p1s': False, 'p2s': False, 'target': False}
+        for file_name in os.listdir(temp_dir):
+            if file_name.endswith('.txt'):
+                if 'p1s' in file_name.lower():
+                    required_txt_files['p1s'] = True
+                elif 'p2s' in file_name.lower():
+                    required_txt_files['p2s'] = True
+                elif 'target' in file_name.lower():
+                    required_txt_files['target'] = True
+        
+        # 检查是否所有必需的txt文件都存在
+        missing_files = [k for k, v in required_txt_files.items() if not v]
+        if missing_files:
+            raise ValueError(f"Missing required txt files: {', '.join(f'{f}.txt' for f in missing_files)}")
+        
+        # 复制并重命名文件
+        for file_name in os.listdir(temp_dir):
+            src_path = os.path.join(temp_dir, file_name)
+            if file_name.endswith('.txt'):
+                # 根据文件名确定目标名称
+                if 'p1s' in file_name.lower():
+                    dst_name = 'p1s.txt'
+                elif 'p2s' in file_name.lower():
+                    dst_name = 'p2s.txt'
+                elif 'target' in file_name.lower():
+                    dst_name = 'target.txt'
+                else:
+                    continue  # 跳过其他txt文件
+            else:
+                # 对于.geno/.ind/.snp文件，使用example作为前缀
+                dst_name = 'example' + os.path.splitext(file_name)[1]
+            dst_path = os.path.join(work_dir, dst_name)
+            shutil.copy2(src_path, dst_path)
+        
+        # 清理临时目录
+        shutil.rmtree(temp_dir)
+        
+        # 启动异步任务
+        task = process_f3.apply_async(
+            args=[work_dir, F3_SCRIPT_PATH],
+            task_id=task_id
+        )
+        
+        return jsonify({
+            'task_id': task.id,
+            'status': 'PENDING',
+            'status_url': url_for('tools.task_status', task_id=task.id)
+        })
+
+    except Exception as e:
+        logger.error(f"Error in f3Analysis: {str(e)}", exc_info=True)
+        if 'work_dir' in locals() and os.path.exists(work_dir):
+            shutil.rmtree(work_dir)
+        return jsonify({"error": str(e)}), 500
+
+@bp.route("/f4", methods=['POST'])
+def f4Analysis():
+    try:
+        data = request.get_json()
+        upload_id = data.get('uploadId')
+        
+        # 生成新的task_id
+        task_id = str(uuid.uuid4())
+        
+        # 源目录和目标目录
+        temp_dir = os.path.join(TEMP_WORK_DIR, upload_id)
+        work_dir = os.path.join(F4_WORK_DIR, task_id)
+        
+        # 创建工作目录并复制文件
+        os.makedirs(work_dir)
+        
+        # 检查必需的txt文件是否存在
+        required_txt_files = {'p1s': False, 'p2s': False, 'p3s': False, 'p4s': False}
+        for file_name in os.listdir(temp_dir):
+            if file_name.endswith('.txt'):
+                if 'p1s' in file_name.lower():
+                    required_txt_files['p1s'] = True
+                elif 'p2s' in file_name.lower():
+                    required_txt_files['p2s'] = True
+                elif 'p3s' in file_name.lower():
+                    required_txt_files['p3s'] = True
+                elif 'p4s' in file_name.lower():
+                    required_txt_files['p4s'] = True
+        
+        # 检查是否所有必需的txt文件都存在
+        missing_files = [k for k, v in required_txt_files.items() if not v]
+        if missing_files:
+            raise ValueError(f"Missing required txt files: {', '.join(f'{f}.txt' for f in missing_files)}")
+        
+        # 复制并重命名文件
+        for file_name in os.listdir(temp_dir):
+            src_path = os.path.join(temp_dir, file_name)
+            if file_name.endswith('.txt'):
+                # 根据文件名确定目标名称
+                if 'p1s' in file_name.lower():
+                    dst_name = 'p1s.txt'
+                elif 'p2s' in file_name.lower():
+                    dst_name = 'p2s.txt'
+                elif 'p3s' in file_name.lower():
+                    dst_name = 'p3s.txt'
+                elif 'p4s' in file_name.lower():
+                    dst_name = 'p4s.txt'
+                else:
+                    continue  # 跳过其他txt文件
+            else:
+                # 对于.geno/.ind/.snp文件，使用example作为前缀
+                dst_name = 'example' + os.path.splitext(file_name)[1]
+            dst_path = os.path.join(work_dir, dst_name)
+            shutil.copy2(src_path, dst_path)
+        
+        # 清理临时目录
+        shutil.rmtree(temp_dir)
+        
+        # 启动异步任务
+        task = process_f4.apply_async(
+            args=[work_dir, F4_SCRIPT_PATH],
+            task_id=task_id
+        )
+        
+        return jsonify({
+            'task_id': task.id,
+            'status': 'PENDING',
+            'status_url': url_for('tools.task_status', task_id=task.id)
+        })
+
+    except Exception as e:
+        logger.error(f"Error in f4Analysis: {str(e)}", exc_info=True)
+        if 'work_dir' in locals() and os.path.exists(work_dir):
+            shutil.rmtree(work_dir)
         return jsonify({"error": str(e)}), 500
 
 

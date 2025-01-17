@@ -1,5 +1,5 @@
 from celery import Celery
-from flask import Flask, current_app
+from flask import Flask
 import logging
 
 logger = logging.getLogger('flaskr.celery_config')
@@ -9,6 +9,7 @@ def make_celery(app: Flask = None):
     try:
         celery = Celery(
             'flaskr',
+            include=['flaskr.tasks'],
             broker='redis://localhost:6379/0',
             result_backend='redis://localhost:6379/1'
         )
@@ -21,24 +22,24 @@ def make_celery(app: Flask = None):
             enable_utc=True,
             task_track_started=True,
             worker_redirect_stdouts=True,
-            worker_redirect_stdouts_level='INFO'
+            worker_redirect_stdouts_level='INFO',
+            broker_connection_retry_on_startup = True
+
         )
         
         if app:
-            config = {
-                'broker_url': app.config.get('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
-                'result_backend': app.config.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1')
-            }
-            celery.conf.update(config)
+            celery.conf.update(
+                broker_url=app.config.get('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
+                result_backend=app.config.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1'),
+                task_track_started=app.config.get('CELERY_TASK_TRACK_STARTED', True),
+                task_time_limit=app.config.get('CELERY_TASK_TIME_LIMIT', 36000)
+            )
             
             class ContextTask(celery.Task):
                 abstract = True
-                
                 def __call__(self, *args, **kwargs):
-                    if not current_app:
-                        with app.app_context():
-                            return self.run(*args, **kwargs)
-                    return self.run(*args, **kwargs)
+                    with app.app_context():
+                        return self.run(*args, **kwargs)
                     
             celery.Task = ContextTask
             
@@ -51,6 +52,7 @@ def make_celery(app: Flask = None):
 celery = make_celery()
 
 def init_app(app):
+    """初始化 Celery 与 Flask 应用的集成"""
     global celery
     celery = make_celery(app)
     return celery

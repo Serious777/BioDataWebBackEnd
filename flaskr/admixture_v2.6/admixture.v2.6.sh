@@ -154,5 +154,5 @@ echo "Files before cleanup:"
 ls -l
 
 # 清理中间文件
-rm -f extract.* tmp.* plink.* *.R full.* [0-9].* result.out \
-    fancyADMIXTURE.r makePalette.r averagePopsUnsorted.r averagePops.r
+#rm -f extract.* tmp.* plink.* *.R full.* [0-9].* result.out \
+#    fancyADMIXTURE.r makePalette.r averagePopsUnsorted.r averagePops.r

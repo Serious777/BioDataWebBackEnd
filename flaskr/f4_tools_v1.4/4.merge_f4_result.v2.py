@@ -88,7 +88,12 @@ if __name__ == '__main__':
         if ".xlsx" not in output:
             output += ".xlsx"
     files = [x for x in os.listdir(path) if x.endswith(suffix)]
-    files.sort(key=lambda x:int(x.split(suffix)[0]))
+    # 尝试按数字排序，如果失败则按字母排序
+    try:
+        files.sort(key=lambda x: int(x.split(suffix)[0]))
+    except ValueError:
+        print("Warning: Could not sort files numerically, using alphabetical sort")
+        files.sort()
     wb = openpyxl.Workbook()
 
     if os.path.exists(os.path.join(path, "summ.table")):
@@ -143,4 +148,65 @@ if __name__ == '__main__':
 
     del wb['Sheet']  # 删除原始表格
     wb.save(os.path.join(path, output))
+    
+    # 生成plot.txt文件
+    try:
+        print("Generating plot.txt...")
+        # 首先检查输入文件
+        if not files:
+            print("No input files found")
+            raise Exception("No input files found")
+        
+        # 读取summ.txt而不是原始result文件
+        if not os.path.exists("../summ.txt"):
+            print("summ.txt not found")
+            raise Exception("summ.txt not found")
+        
+        data_written = False  # 标记是否写入了任何数据
+        with open("plot.txt", "w") as plot_file:
+            with open("../summ.txt") as text:
+                for line in text:
+                    if line.startswith("result:"):
+                        fields = line.strip().split()
+                        if len(fields) >= 8:  # 确保有足够的字段
+                            try:
+                                # 格式：pop Fst z_score order
+                                pop = f"{fields[2]}-{fields[3]}"  # pop1-pop2
+                                fst = fields[5]  # f4值
+                                z_score = fields[7]  # Z值
+                                plot_file.write(f"{pop}\t{fst}\t{z_score}\t1\n")
+                                data_written = True
+                            except Exception as e:
+                                print(f"Error processing line: {line}")
+                                print(f"Fields: {fields}")
+                                print(f"Error: {str(e)}")
+                                continue
+        
+        if not data_written:
+            raise Exception("No valid data found in summ.txt")
+        
+        print("Successfully generated plot.txt")
+        # 验证生成的文件
+        if os.path.exists("plot.txt"):
+            with open("plot.txt") as f:
+                content = f.read()
+                if not content.strip():
+                    raise Exception("plot.txt is empty")
+                print("plot.txt content:")
+                print(content[:200] + "..." if len(content) > 200 else content)
+        else:
+            print("Failed to generate plot.txt")
+            raise Exception("Failed to generate plot.txt")
+    except Exception as e:
+        print(f"Error generating plot.txt: {str(e)}")
+        print(f"Current directory: {os.getcwd()}")
+        print("Directory contents:")
+        print(os.listdir("."))
+        print("Content of summ.txt:")
+        try:
+            with open("../summ.txt") as f:
+                print(f.read())
+        except Exception as read_error:
+            print(f"Could not read summ.txt: {str(read_error)}")
+        raise
 

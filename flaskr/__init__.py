@@ -2,8 +2,7 @@ import os
 import logging
 from flask import Flask
 from flask_cors import CORS
-from .celery_config import celery
-
+from . import celery_config  # 使用相对导入
 
 def create_app(test_config=None):
     # create and configure the app
@@ -72,15 +71,14 @@ def create_app(test_config=None):
 
     # 配置 Celery
     app.config.update(
-        broker_url='redis://localhost:6379/0',
-        result_backend='redis://localhost:6379/1',
-        task_track_started=True,
-        task_time_limit=3600
+        CELERY_BROKER_URL='redis://localhost:6379/0',
+        CELERY_RESULT_BACKEND='redis://localhost:6379/1',
+        CELERY_TASK_TRACK_STARTED=True,
+        CELERY_TASK_TIME_LIMIT=36000
     )
     
     # 初始化 Celery
     try:
-        celery.init_app(app)
         logging.info("Celery initialized successfully with app context")
     except Exception as e:
         logging.error(f"Failed to initialize Celery: {str(e)}")
