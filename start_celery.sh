@@ -3,11 +3,13 @@
 # 设置环境变量
 export PYTHONPATH=/root/project-dev/backend
 
+# 确保使用唯一的 worker 名称（使用时间戳）
+TIMESTAMP=$(date +%s)
+WORKER_NAME="worker_${TIMESTAMP}@VM-16-15-debian"
 
 # 启动 Celery worker
-# 使用单个 worker，限制并发数
-python -m celery -A celery_worker.celery worker \
-    -l INFO \
-    --pool=solo \
-    --concurrency=1 \
-    --max-tasks-per-child=1
+celery -A celery_worker.celery worker \
+    --loglevel=INFO \
+    -n "$WORKER_NAME" \
+    --pidfile="/tmp/celery_${TIMESTAMP}.pid"
+

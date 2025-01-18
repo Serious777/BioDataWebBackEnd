@@ -1,0 +1,51 @@
+处理文件: ./result/Indian-AfricanAmerican-Finnish.result
+Indian AfricanAmerican Finnish  best coefficients: 2.866 -1.866  std. errors: 41.689 41.689  tail: 0.770509 处理文件: ./result/Indian-AfricanAmerican-Finnish-Russian.result
+Indian AfricanAmerican Finnish Russian best coefficients: 1.628 -0.882 0.254 std. errors: 85.244 59.850 32.836 tail: 0.461778 处理文件: ./result/Indian-AfricanAmerican-Mexican-Finnish.result
+Indian AfricanAmerican Mexican Finnish best coefficients: -10.290 5.560 5.731 std. errors: 584.595 446.416 152.510 tail: 0.743008 处理文件: ./result/Indian-AfricanAmerican-Mexican.result
+Indian AfricanAmerican Mexican  best coefficients: 5.385 -4.385  std. errors: 93.584 93.584  tail: 0.354795 处理文件: ./result/Indian-AfricanAmerican-Mexican-Russian.result
+Indian AfricanAmerican Mexican Russian best coefficients: 1.040 -0.811 0.772 std. errors: 26.737 79.116 62.672 tail: 0.983416 处理文件: ./result/Indian-AfricanAmerican.result
+Indian AfricanAmerican   best coefficients: 0.000   std. errors: 0.000   tail: 0.968977 处理文件: ./result/Indian-AfricanAmerican-Russian.result
+Indian AfricanAmerican Russian  best coefficients: 0.597 0.403  std. errors: 10.872 10.872  tail: 0.563164 处理文件: ./result/Indian-Finnish.result
+Indian Finnish   best coefficients: 0.000   std. errors: 0.000   tail: 0.753071 处理文件: ./result/Indian-Finnish-Russian.result
+Indian Finnish Russian  best coefficients: 0.160 0.840  std. errors: 26.874 26.874  tail: 0.353048 处理文件: ./result/Indian-Japanese-AfricanAmerican-Finnish.result
+Indian Japanese AfricanAmerican Finnish best coefficients: 0.038 3.863 -2.901 std. errors: 19.074 40.061 29.951 tail: 0.738301 处理文件: ./result/Indian-Japanese-AfricanAmerican-Mexican.result
+Indian Japanese AfricanAmerican Mexican best coefficients: 0.621 1.558 -1.179 std. errors: 122.667 51.880 169.844 tail: 0.132081 处理文件: ./result/Indian-Japanese-AfricanAmerican.result
+Indian Japanese AfricanAmerican  best coefficients: 0.831 0.169  std. errors: 7.863 7.863  tail: 0.242465 处理文件: ./result/Indian-Japanese-AfricanAmerican-Russian.result
+Indian Japanese AfricanAmerican Russian best coefficients: -0.147 0.581 0.566 std. errors: 8.311 8.236 8.505 tail: 0.235132 处理文件: ./result/Indian-Japanese-Finnish.result
+Indian Japanese Finnish  best coefficients: 1.059 -0.059  std. errors: 12.606 12.606  tail: 0.343143 处理文件: ./result/Indian-Japanese-Finnish-Russian.result
+Indian Japanese Finnish Russian best coefficients: -2.048 0.485 2.563 std. errors: 65.589 17.530 49.654 tail: 0.374183 处理文件: ./result/Indian-Japanese-Mexican-Finnish.result
+Indian Japanese Mexican Finnish best coefficients: 2.099 -1.922 0.823 std. errors: 52.359 54.650 27.732 tail: 0.289062 处理文件: ./result/Indian-Japanese-Mexican.result
+Indian Japanese Mexican  best coefficients: 0.668 0.332  std. errors: 15.438 15.438  tail: 0.340980 处理文件: ./result/Indian-Japanese-Mexican-Russian.result
+Indian Japanese Mexican Russian best coefficients: 2.398 5.228 -6.627 std. errors: 24.768 119.385 118.279 tail: 0.882698 处理文件: ./result/Indian-Japanese.result
+Indian Japanese   best coefficients: 0.000   std. errors: 0.000   tail: 0.218528 处理文件: ./result/Indian-Japanese-Russian.result
+Indian Japanese Russian  best coefficients: -0.156 1.156  std. errors: 167.963 167.963  tail: 0.430843 处理文件: ./result/Indian-Mexican-Finnish.result
+Indian Mexican Finnish  best coefficients: 1.012 -0.012  std. errors: 24.957 24.957  tail: 0.316644 处理文件: ./result/Indian-Mexican-Finnish-Russian.result
+Indian Mexican Finnish Russian best coefficients: -0.356 0.794 0.562 std. errors: 60.645 26.844 39.594 tail: 0.450976 处理文件: ./result/Indian-Mexican.result
+Indian Mexican   best coefficients: 0.000   std. errors: 0.000   tail: 0.341975 处理文件: ./result/Indian-Mexican-Russian.result
+Indian Mexican Russian  best coefficients: -20.070 21.070  std. errors: 42.438 42.438  tail: 0.598502 处理文件: ./result/Indian-Russian.result
+Indian Russian   best coefficients: 0.000   std. errors: 0.000   tail: 0.228291 处理文件: ./result/Italian-AfricanAmerican-Finnish.result
+Italian AfricanAmerican Finnish  best coefficients: 3.103 -2.103  std. errors: 49.767 49.767  tail: 0.837534 处理文件: ./result/Italian-AfricanAmerican-Finnish-Russian.result
+Italian AfricanAmerican Finnish Russian best coefficients: 2.303 -1.641 0.338 std. errors: 190.326 158.587 58.612 tail: 0.507104 处理文件: ./result/Italian-AfricanAmerican-Mexican-Finnish.result
+Italian AfricanAmerican Mexican Finnish best coefficients: -7.492 4.402 4.090 std. errors: 31.554 25.585 26.772 tail: 0.750572 处理文件: ./result/Italian-AfricanAmerican-Mexican.result
+Italian AfricanAmerican Mexican  best coefficients: 4.167 -3.167  std. errors: 51.601 51.601  tail: 0.379922 处理文件: ./result/Italian-AfricanAmerican-Mexican-Russian.result
+Italian AfricanAmerican Mexican Russian best coefficients: 1.536 -1.959 1.422 std. errors: 86.990 148.231 77.825 tail: 0.788184 处理文件: ./result/Italian-AfricanAmerican.result
+Italian AfricanAmerican   best coefficients: 0.000   std. errors: 0.000   tail: 0.670863 处理文件: ./result/Italian-AfricanAmerican-Russian.result
+Italian AfricanAmerican Russian  best coefficients: 5.060 -4.060  std. errors: 54.584 54.584  tail: 0.191874 处理文件: ./result/Italian-Finnish.result
+Italian Finnish   best coefficients: 0.000   std. errors: 0.000   tail: 0.329052 处理文件: ./result/Italian-Finnish-Russian.result
+Italian Finnish Russian  best coefficients: -0.427 1.427  std. errors: 15.093 15.093  tail: 0.372830 处理文件: ./result/Italian-Japanese-AfricanAmerican-Finnish.result
+Italian Japanese AfricanAmerican Finnish best coefficients: -0.056 3.972 -2.916 std. errors: 12.773 82.680 83.821 tail: 0.875543 处理文件: ./result/Italian-Japanese-AfricanAmerican-Mexican.result
+Italian Japanese AfricanAmerican Mexican best coefficients: 0.787 1.947 -1.734 std. errors: 49.575 62.522 30.734 tail: 0.159519 处理文件: ./result/Italian-Japanese-AfricanAmerican.result
+Italian Japanese AfricanAmerican  best coefficients: 5.920 -4.920  std. errors: 33.146 33.146  tail: 0.100511 处理文件: ./result/Italian-Japanese-AfricanAmerican-Russian.result
+Italian Japanese AfricanAmerican Russian best coefficients: -2.765 -1.161 4.927 std. errors: 399.385 552.429 295.154 tail: 0.090069 处理文件: ./result/Italian-Japanese-Finnish.result
+Italian Japanese Finnish  best coefficients: 1.517 -0.517  std. errors: 134.054 134.054  tail: 0.087907 处理文件: ./result/Italian-Japanese-Finnish-Russian.result
+Italian Japanese Finnish Russian best coefficients: -1.916 0.242 2.673 std. errors: 74.572 21.831 64.276 tail: 0.586084 处理文件: ./result/Italian-Japanese-Mexican-Finnish.result
+Italian Japanese Mexican Finnish best coefficients: -1.140 2.701 -0.561 std. errors: 28.305 34.942 30.938 tail: 0.318046 处理文件: ./result/Italian-Japanese-Mexican.result
+Italian Japanese Mexican  best coefficients: 1.244 -0.244  std. errors: 80.467 80.467  tail: 0.198774 处理文件: ./result/Italian-Japanese-Mexican-Russian.result
+Italian Japanese Mexican Russian best coefficients: 38.356 97.603 -134.959 std. errors: 80.709 129.616 159.233 tail: 0.846405 处理文件: ./result/Italian-Japanese.result
+Italian Japanese   best coefficients: 0.000   std. errors: 0.000   tail: 0.054843 处理文件: ./result/Italian-Japanese-Russian.result
+Italian Japanese Russian  best coefficients: -3.311 4.311  std. errors: 92.073 92.073  tail: 0.300883 处理文件: ./result/Italian-Mexican-Finnish.result
+Italian Mexican Finnish  best coefficients: 1.515 -0.515  std. errors: 38.825 38.825  tail: 0.446054 处理文件: ./result/Italian-Mexican-Finnish-Russian.result
+Italian Mexican Finnish Russian best coefficients: 0.169 0.507 0.324 std. errors: 37.392 7.093 36.483 tail: 0.486784 处理文件: ./result/Italian-Mexican.result
+Italian Mexican   best coefficients: 0.000   std. errors: 0.000   tail: 0.523517 处理文件: ./result/Italian-Mexican-Russian.result
+Italian Mexican Russian  best coefficients: -4.411 5.411  std. errors: 102.504 102.504  tail: 0.648375 处理文件: ./result/Italian-Russian.result
+Italian Russian   best coefficients: 0.000   std. errors: 0.000   tail: 0.286949 

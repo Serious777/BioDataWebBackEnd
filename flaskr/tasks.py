@@ -461,3 +461,177 @@ def process_f4(self, work_dir, script_path):
                               'exc_type': type(e).__name__,
                               'exc_message': str(e)})
         raise
+
+@celery.task(bind=True, 
+             soft_time_limit=3600,  # 1小时超时
+             time_limit=3660)       # 额外60秒用于清理
+@cleanup_on_failure
+def process_qpwave(self, work_dir, script_path):
+    try:
+        logger.info(f"qpWave Task {self.request.id} started")
+        self.update_state(state='STARTED', meta={'progress': 0})
+        
+        # 检查必要文件和目录
+        if not os.path.isfile(script_path):
+            raise FileNotFoundError(f"Script not found at: {script_path}")
+            
+        if not os.path.isdir(work_dir):
+            raise NotADirectoryError(f"Work directory not found: {work_dir}")
+        
+        # 执行脚本
+        self.update_state(state='PROCESSING', meta={'progress': 30})
+        cmd = ['/bin/bash', script_path, work_dir]
+        logger.info(f"Executing command: {' '.join(cmd)}")
+        
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=work_dir,
+            bufsize=1,
+            universal_newlines=True
+        )
+        
+        # 实时获取输出
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                logger.info(f"Script output: {output.strip()}")
+                
+            error = process.stderr.readline()
+            if error:
+                logger.error(f"Script error: {error.strip()}")
+        
+        stdout, stderr = process.communicate()
+        if stdout:
+            logger.info(f"Final output: {stdout}")
+        if stderr:
+            logger.error(f"Final stderr: {stderr}")
+            
+        if process.returncode != 0:
+            error_msg = f"Process failed with return code {process.returncode}"
+            logger.error(error_msg)
+            # 检查工作目录内容
+            try:
+                logger.error("Work directory contents:")
+                for file in os.listdir(work_dir):
+                    logger.error(f"  {file}")
+            except Exception as e:
+                logger.error(f"Failed to list directory contents: {e}")
+            raise Exception(error_msg)
+            
+        # 检查结果文件
+        result_file = os.path.join(work_dir, 'qpwave.zip')
+        if not os.path.exists(result_file):
+            files = os.listdir(work_dir)
+            raise FileNotFoundError(f"Result file not generated at {result_file}. Directory contents: {files}")
+            
+        if not os.path.getsize(result_file):
+            raise Exception("Result file is empty")
+            
+        return {'file': result_file}
+        
+    except Exception as e:
+        logger.error(f"Error in process_qpwave: {str(e)}")
+        # 尝试获取更多上下文信息
+        try:
+            if os.path.exists(os.path.join(work_dir, 'error.txt')):
+                with open(os.path.join(work_dir, 'error.txt'), 'r') as f:
+                    logger.error(f"Content of error.txt: {f.read()}")
+        except Exception as read_error:
+            logger.error(f"Failed to read error.txt: {read_error}")
+        raise
+
+@celery.task(bind=True, 
+             soft_time_limit=3600,  # 1小时超时
+             time_limit=3660)       # 额外60秒用于清理
+@cleanup_on_failure
+def process_qpadm(self, work_dir, script_path):
+    try:
+        logger.info(f"qpAdm Task {self.request.id} started")
+        self.update_state(state='STARTED', meta={'progress': 0})
+        
+        # 检查必要文件和目录
+        if not os.path.isfile(script_path):
+            raise FileNotFoundError(f"Script not found at: {script_path}")
+            
+        if not os.path.isdir(work_dir):
+            raise NotADirectoryError(f"Work directory not found: {work_dir}")
+            
+        # 检查输入文件
+        required_files = ['example.geno', 'example.ind', 'example.snp',
+                         'target.txt', 'source.txt', 'outgroup.txt']
+        for file in required_files:
+            file_path = os.path.join(work_dir, file)
+            if not os.path.isfile(file_path):
+                raise FileNotFoundError(f"Required file missing: {file}")
+        
+        # 执行脚本
+        self.update_state(state='PROCESSING', meta={'progress': 30})
+        cmd = ['/bin/bash', script_path, work_dir]
+        logger.info(f"Executing command: {' '.join(cmd)}")
+        
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=work_dir,
+            bufsize=1,
+            universal_newlines=True
+        )
+        
+        # 实时获取输出
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                logger.info(f"Script output: {output.strip()}")
+                
+            error = process.stderr.readline()
+            if error:
+                logger.error(f"Script error: {error.strip()}")
+        
+        stdout, stderr = process.communicate()
+        if stdout:
+            logger.info(f"Final output: {stdout}")
+        if stderr:
+            logger.error(f"Final stderr: {stderr}")
+            
+        if process.returncode != 0:
+            error_msg = f"Process failed with return code {process.returncode}"
+            logger.error(error_msg)
+            # 检查工作目录内容
+            try:
+                logger.error("Work directory contents:")
+                for file in os.listdir(work_dir):
+                    logger.error(f"  {file}")
+            except Exception as e:
+                logger.error(f"Failed to list directory contents: {e}")
+            raise Exception(error_msg)
+            
+        # 检查结果文件
+        result_file = os.path.join(work_dir, 'qpadm.zip')
+        if not os.path.exists(result_file):
+            files = os.listdir(work_dir)
+            raise FileNotFoundError(f"Result file not generated at {result_file}. Directory contents: {files}")
+            
+        if not os.path.getsize(result_file):
+            raise Exception("Result file is empty")
+            
+        return {'file': result_file}
+        
+    except Exception as e:
+        logger.error(f"Error in process_qpadm: {str(e)}")
+        # 尝试获取更多上下文信息
+        try:
+            if os.path.exists(os.path.join(work_dir, 'error.txt')):
+                with open(os.path.join(work_dir, 'error.txt'), 'r') as f:
+                    logger.error(f"Content of error.txt: {f.read()}")
+        except Exception as read_error:
+            logger.error(f"Failed to read error.txt: {read_error}")
+        raise
